@@ -1,67 +1,54 @@
 import streamlit as st
 import pandas as pd
 import base64
-from io import StringIO
 
-st.set_page_config(page_title="Wi-Fi Snapshot Viewer", layout="wide")
+# ------------------------
+# Konfigurasi tampilan halaman
+# ------------------------
+st.set_page_config(
+    page_title="Wi-Fi Snapshot UNTIRTA",
+    layout="wide"
+)
 
 st.title("📡 Wi-Fi Snapshot UNTIRTA")
-st.markdown("Upload otomatis dari aplikasi lokal atau unggah manual file snapshot .csv")
+st.markdown("""
+Unggah file snapshot jaringan Wi-Fi hasil dari aplikasi lokal Anda (.csv).  
+Aplikasi ini akan menampilkan isi file dan menyediakan tautan untuk mengunduh ulang.
+""")
 
-# Simpan snapshot ke session state agar tidak hilang saat reload
-if 'snapshots' not in st.session_state:
-    st.session_state.snapshots = []
-
-# Fungsi untuk membuat tautan unduhan
+# ------------------------
+# Fungsi: Buat tautan unduhan CSV dari DataFrame
+# ------------------------
 def get_table_download_link(df, filename="snapshot.csv"):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">📥 Unduh snapshot CSV</a>'
+    href = f'''
+        <a href="data:file/csv;base64,{b64}" download="{filename}" style="font-size:16px;">
+            📥 Unduh kembali file snapshot
+        </a>
+    '''
     return href
 
 # ------------------------
-# 📥 Bagian Upload Otomatis (POST dari script Python lokal)
+# Upload file
 # ------------------------
-# Kompatibel dengan: requests.post(..., files={"file": ("snapshot.csv", csv_bytes, "text/csv")})
+uploaded_file = st.file_uploader("📤 Unggah file snapshot jaringan Wi-Fi (.csv)", type=["csv"])
 
-uploaded_via_post = False
-if "file" in st.query_params:
-    uploaded_file = st.query_params["file"]
-else:
-    uploaded_file = None
-
-if st.requested_session_state is not None:
-    # Support file upload via POST from local uploader
+# ------------------------
+# Proses dan tampilkan data
+# ------------------------
+if uploaded_file is not None:
     try:
-        post_data = st.requested_session_state.uploaded_file_data
-        if post_data:
-            stringio = StringIO(post_data.getvalue().decode("utf-8"))
-            df = pd.read_csv(stringio)
-            st.session_state.snapshots.append(df)
-            uploaded_via_post = True
-    except Exception:
-        pass
+        df = pd.read_csv(uploaded_file)
+        st.success(f"✅ File berhasil diunggah. Jumlah jaringan: {len(df)}")
+        st.dataframe(df, use_container_width=True)
+        
+        # Tampilkan tautan unduhan
+        st.markdown("---")
+        st.markdown("### 🔽 Unduh Data")
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-# ------------------------
-# 📤 Upload Manual dari Pengguna
-# ------------------------
-st.subheader("📤 Upload Manual Snapshot")
-manual_upload = st.file_uploader("Unggah file snapshot Wi-Fi (.csv)", type=["csv"])
-
-if manual_upload is not None:
-    df = pd.read_csv(manual_upload)
-    st.session_state.snapshots.append(df)
-
-# ------------------------
-# 📊 Tampilkan Hasil Snapshot
-# ------------------------
-if st.session_state.snapshots:
-    latest_df = st.session_state.snapshots[-1]
-    st.success(f"✅ Berhasil menerima data. Jumlah jaringan: {len(latest_df)}")
-    st.dataframe(latest_df, use_container_width=True)
-    st.markdown(get_table_download_link(latest_df), unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"❌ Gagal membaca file. Pastikan file dalam format .csv yang benar.\n\n**Error:** {e}")
 else:
-    if uploaded_via_post:
-        st.warning("Data upload diterima tapi kosong atau gagal dibaca.")
-    else:
-        st.info("Belum ada data yang diunggah. Unggah file CSV dari aplikasi lokal atau browser.")
+    st.info("Silakan unggah file hasil snapshot dari aplikasi lokal untuk melihat datanya di sini.")
