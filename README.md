@@ -1,6 +1,6 @@
-# Auto Detect IP - Streamlit App
+# Auto Detect IP (Detector Wifi Sekitar Khusus Untirta) - Streamlit App
 
-Aplikasi sederhana berbasis Streamlit yang secara otomatis mendeteksi dan menampilkan alamat IP pengguna. Cocok untuk digunakan sebagai referensi pembelajaran dasar Streamlit dan pemrosesan jaringan sederhana.
+Aplikasi sederhana berbasis Streamlit yang secara otomatis mendeteksi Wifi Sekitar.
 
 ---
 
@@ -8,8 +8,7 @@ Aplikasi sederhana berbasis Streamlit yang secara otomatis mendeteksi dan menamp
 
 - Deteksi alamat IP publik pengguna secara otomatis
 - Tampilan web interaktif menggunakan Streamlit
-- Ringan dan mudah dijalankan secara lokal
-
+  
 ---
 
 ## Cara Clone Repository
@@ -57,7 +56,7 @@ streamlit run app.py
 
 ---
 
-## 🌐 Akses Aplikasi
+## Akses Aplikasi
 
 Aplikasi akan berjalan di browser pada alamat:
 
